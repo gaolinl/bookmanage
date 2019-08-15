@@ -104,6 +104,7 @@ public class RecordService {
             record.setStartTime(GetDateFormat.getDateFormat(startTime));
             record.setEndTime(GetDateFormat.getDateFormat(endTime));
         }
+
         PageHelper.startPage(pageNum,pageSize);
         Result result = new Result();
         List<Record> list = mapper.selectBorrowRecord(record);
