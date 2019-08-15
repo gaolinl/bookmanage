@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.BookMenuMapper">
+  <resultMap id="BaseResultMap" type="com.example.demo.pojo.BookMenu">
+    <id column="menu_id" jdbcType="INTEGER" property="menuId" />
+    <result column="menu_name" jdbcType="VARCHAR" property="menuName" />
+    <result column="menu_url" jdbcType="VARCHAR" property="menuUrl" />
+    <result column="parent_node" jdbcType="INTEGER" property="parentNode" />
+    <result column="icon" jdbcType="VARCHAR" property="icon" />
+    <result column="sort" jdbcType="INTEGER" property="sort" />
+    <result column="level" jdbcType="INTEGER" property="level" />
+    <result column="menu_create_time" jdbcType="TIMESTAMP" property="menuCreateTime" />
+    <result column="menu_update_time" jdbcType="TIMESTAMP" property="menuUpdateTime" />
+    <result column="menu_status" jdbcType="INTEGER" property="menuStatus" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from book_menu
+    where menu_id = #{menuId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.example.demo.pojo.BookMenu">
+    insert into book_menu (menu_id, menu_name, menu_url, 
+      parent_node, icon, sort, 
+      level, menu_create_time, menu_update_time, 
+      menu_status)
+    values (#{menuId,jdbcType=INTEGER}, #{menuName,jdbcType=VARCHAR}, #{menuUrl,jdbcType=VARCHAR}, 
+      #{parentNode,jdbcType=INTEGER}, #{icon,jdbcType=VARCHAR}, #{sort,jdbcType=INTEGER}, 
+      #{level,jdbcType=INTEGER}, #{menuCreateTime,jdbcType=TIMESTAMP}, #{menuUpdateTime,jdbcType=TIMESTAMP}, 
+      #{menuStatus,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.example.demo.pojo.BookMenu">
+    update book_menu
+    set menu_name = #{menuName,jdbcType=VARCHAR},
+      menu_url = #{menuUrl,jdbcType=VARCHAR},
+      parent_node = #{parentNode,jdbcType=INTEGER},
+      icon = #{icon,jdbcType=VARCHAR},
+      sort = #{sort,jdbcType=INTEGER},
+      level = #{level,jdbcType=INTEGER},
+      menu_create_time = #{menuCreateTime,jdbcType=TIMESTAMP},
+      menu_update_time = #{menuUpdateTime,jdbcType=TIMESTAMP},
+      menu_status = #{menuStatus,jdbcType=INTEGER}
+    where menu_id = #{menuId,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select menu_id, menu_name, menu_url, parent_node, icon, sort, level, menu_create_time, 
+    menu_update_time, menu_status
+    from book_menu
+    where menu_id = #{menuId,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select menu_id, menu_name, menu_url, parent_node, icon, sort, level, menu_create_time, 
+    menu_update_time, menu_status
+    from book_menu
+  </select>
+</mapper>

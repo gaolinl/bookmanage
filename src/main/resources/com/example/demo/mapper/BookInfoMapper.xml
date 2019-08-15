@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.BookInfoMapper">
+  <resultMap id="BaseResultMap" type="com.example.demo.pojo.BookInfo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="count(id)" jdbcType="INTEGER" property="num" />
+    <result column="book_ISBN" jdbcType="VARCHAR" property="bookIsbn" />
+    <result column="book_name" jdbcType="VARCHAR" property="bookName" />
+    <result column="book_type" jdbcType="VARCHAR" property="bookType" />
+    <result column="author" jdbcType="VARCHAR" property="author" />
+    <result column="price" jdbcType="DOUBLE" property="price" />
+    <result column="publisher" jdbcType="VARCHAR" property="publisher" />
+    <result column="book_create_time" jdbcType="TIMESTAMP" property="bookCreateTime" />
+    <result column="book_update_time" jdbcType="TIMESTAMP" property="bookUpdateTime" />
+    <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    <result column="update_user" jdbcType="VARCHAR" property="updateUser" />
+    <result column="description" jdbcType="VARCHAR" property="desc" />
+    <result column="picture" jdbcType="VARCHAR" property="picture" />
+    <result column="group_id" jdbcType="VARCHAR" property="groupId" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from book_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+    insert into book_info ( book_ISBN, book_name,
+      book_type, author, price, 
+      publisher, book_create_time, book_update_time,create_user,update_user,description,picture,group_id,status
+      )
+    values
+    <foreach collection="list" item="item" separator=",">
+      ( #{item.bookIsbn,jdbcType=VARCHAR}, #{item.bookName,jdbcType=VARCHAR},
+      #{item.bookType,jdbcType=VARCHAR}, #{item.author,jdbcType=VARCHAR}, #{item.price,jdbcType=DOUBLE},
+      #{item.publisher,jdbcType=VARCHAR}, #{item.bookCreateTime,jdbcType=TIMESTAMP}, #{item.bookUpdateTime,jdbcType=TIMESTAMP},#{item.createUser},#{item.createUser}
+      ,#{item.desc},#{item.picture},#{item.groupId},'在馆'
+      )
+    </foreach>
+
+  </insert>
+  <update id="updateISBN" parameterType="com.example.demo.pojo.BookInfo">
+    update book_info set book_ISBN =
+    <foreach collection="list" item="item" separator=" " open="case id" close="end">
+      when #{item.id} then #{item.bookIsbn}
+    </foreach>
+    where id in
+    <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+      #{item.id}
+    </foreach>
+  </update>
+  <update id="updateBookIsbn" parameterType="com.example.demo.pojo.BookInfo">
+    update book_info set book_ISBN = concat(#{bookIsbn},id) where group_id = #{groupId}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="java.util.List">
+    update book_info
+    set book_ISBN = #{bookIsbn,jdbcType=VARCHAR},
+      book_name = #{bookName,jdbcType=VARCHAR},
+      book_type = #{bookType,jdbcType=VARCHAR},
+      author = #{author,jdbcType=VARCHAR},
+      price = #{price,jdbcType=DOUBLE},
+      publisher = #{publisher,jdbcType=VARCHAR},
+      book_create_time = #{bookCreateTime,jdbcType=TIMESTAMP},
+      book_update_time = #{bookUpdateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, book_ISBN, book_name, book_type, author, price, publisher, book_create_time,description,group_id
+    book_update_time
+    from book_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectBorrowNum" parameterType="com.example.demo.pojo.BookInfo" resultType="java.lang.Integer">
+    select count(*) from book_info where  status = '在馆'and group_id = #{groupId}
+    <if test="bookIsbn!=null and bookIsbn!=''">
+      and book_ISBN like concat('%',#{bookIsbn},'%')
+    </if>
+    <if test="bookName!=null and bookName != ''">
+      and book_name like concat('%',#{bookName},'%')
+    </if>
+    <if test="bookType!=null and bookType!=''">
+      and book_type = #{bookType}
+    </if>
+    <if test="author!=null and author!=''">
+      and author = #{author}
+    </if>
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" parameterType="com.example.demo.pojo.BookInfo">
+    select count(id),id, book_ISBN, book_name, book_type, author, price, publisher, book_create_time,description,group_id,
+    book_update_time,create_user,update_user,status,picture
+    from book_info
+    <where>
+      <if test="bookIsbn!=null and bookIsbn!=''">
+        book_ISBN like concat('%',#{bookIsbn},'%')
+      </if>
+      <if test="bookName!=null and bookName != ''">
+        and book_name like concat('%',#{bookName},'%')
+      </if>
+
+      <if test="bookType!=null and bookType!=''">
+        and book_type = #{bookType}
+      </if>
+      <if test="author!=null and author!=''">
+        and author = #{author}
+      </if>
+      <if test="price!=null and price!=''">
+        and price = #{price}
+      </if>
+      <if test="publisher!=null and publisher!=''">
+        and publisher = #{publisher}
+      </if>
+      <if test="desc!=null and desc!=''">
+        and description = #{desc}
+      </if>
+      <if test="status!=null and status!=''">
+        and status = #{status}
+      </if>
+    </where>
+    group by group_id
+  </select>
+  <select id="selectBookByGroup" parameterType="com.example.demo.pojo.BookInfo" resultMap="BaseResultMap">
+    select * from book_info where group_id = #{groupId}
+    <if test="status!=null and status!=''">
+      and status = #{status}
+    </if>
+  </select>
+  <update id="updateBookInfo" parameterType="com.example.demo.pojo.BookInfo">
+    update book_info set
+      book_name = #{bookName,jdbcType=VARCHAR},
+      book_type = #{bookType,jdbcType=VARCHAR},
+      author = #{author,jdbcType=VARCHAR},
+      price = #{price,jdbcType=DOUBLE},
+      publisher = #{publisher,jdbcType=VARCHAR},
+      description = #{desc,jdbcType=VARCHAR},
+      picture = #{picture},
+      book_update_time = #{bookUpdateTime,jdbcType=TIMESTAMP},
+      update_user = #{updateUser}
+    where group_id = #{groupId,jdbcType=INTEGER}
+  </update>
+
+  <!--添加借阅记录-->
+  <insert id="insertBorrowRecord" parameterType="com.example.demo.pojo.Record">
+    insert into book_borrow_record (borrow_user,borrow_number,borrow_time)
+    VALUES (#{loginName},#{borrowNum},#{borrowTime})
+  </insert>
+  
+  <!--添加借阅记录明细表-->
+  <insert id="insertBorrowDetail" parameterType="java.util.List">
+    insert into borrow_detail (book_ISBN,borrow_user,borrow_time,book_status,borrow_record_id)
+    VALUES
+    <foreach collection="list" item="item" separator=",">
+      (#{item.bookIsbn},#{item.borrowUser},#{item.borrowTime},'借出',#{borrowRecordId}
+      )
+    </foreach>
+  </insert>
+
+  <!--批量更新图书状态-->
+  <update id="updateBookStatus" parameterType="java.util.List" >
+    update book_info set status =
+    <foreach collection="list" item="item" separator=" " open="case id" close="end">
+      when #{item.id} then #{item.status}
+    </foreach>
+    where id in
+    <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+      #{item.id}
+    </foreach>
+  </update>
+  <!--根据图书编号单个更新图书状态-->
+  <update id="updateBookStatusOne" parameterType="com.example.demo.pojo.Record">
+    update book_info set status = #{status} where book_ISBN = #{bookIsbn}
+  </update>
+
+  <update id="updateBookStatusById" parameterType="com.example.demo.pojo.BookInfo">
+    update book_info
+    <trim prefix="set" suffixOverrides=",">
+      <if test="status!=null and status!=''">
+        status = #{status},
+      </if>
+      <if test="bookUpdateTime!=null">
+        book_update_time = #{bookUpdateTime},
+      </if>
+      <if test="updateUser!=null and updateUser!=''">
+        update_user = #{updateUser},
+      </if>
+    </trim>
+    where book_ISBN = #{bookIsbn}
+  </update>
+</mapper>

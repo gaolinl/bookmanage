@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.BookRecordMapper">
+    <resultMap id="BaseResultMap" type="com.example.demo.pojo.BookInfo">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="count(id)" jdbcType="INTEGER" property="num" />
+        <result column="book_ISBN" jdbcType="VARCHAR" property="bookIsbn" />
+        <result column="book_name" jdbcType="VARCHAR" property="bookName" />
+        <result column="book_type" jdbcType="VARCHAR" property="bookType" />
+        <result column="author" jdbcType="VARCHAR" property="author" />
+        <result column="price" jdbcType="DOUBLE" property="price" />
+        <result column="publisher" jdbcType="VARCHAR" property="publisher" />
+        <result column="book_create_time" jdbcType="TIMESTAMP" property="bookCreateTime" />
+        <result column="book_update_time" jdbcType="TIMESTAMP" property="bookUpdateTime" />
+        <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+        <result column="update_user" jdbcType="VARCHAR" property="updateUser" />
+        <result column="description" jdbcType="VARCHAR" property="desc" />
+        <result column="picture" jdbcType="VARCHAR" property="picture" />
+        <result column="group_id" jdbcType="VARCHAR" property="groupId" />
+        <result column="status" jdbcType="VARCHAR" property="status" />
+    </resultMap>
+    
+    <resultMap id="recordMap" type="com.example.demo.pojo.Record">
+        <id column="id" jdbcType="INTEGER" property="id"></id>
+        <result column="borrow_record_id" jdbcType="INTEGER" property="borrowRecordId" />
+        <result column="book_ISBN" jdbcType="VARCHAR" property="bookIsbn" />
+        <result column="book_name" jdbcType="VARCHAR" property="bookName" />
+        <result column="borrow_user" jdbcType="VARCHAR" property="loginName" />
+        <result column="borrow_time" jdbcType="TIMESTAMP" property="borrowTime" />
+        <result column="return_time" jdbcType="TIMESTAMP" property="returnTime" />
+        <result column="book_status" jdbcType="VARCHAR" property="status" />
+        <result column="borrow_number" jdbcType="INTEGER" property="borrowNum" />
+        <result column="return_number" jdbcType="INTEGER" property="returnNumber" />
+
+        <result column="book_type" jdbcType="VARCHAR" property="bookType" />
+        <result column="author" jdbcType="VARCHAR" property="author" />
+        <result column="price" jdbcType="DOUBLE" property="price" />
+        <result column="publisher" jdbcType="VARCHAR" property="publisher" />
+        <result column="description" jdbcType="VARCHAR" property="desc" />
+        <result column="picture" jdbcType="VARCHAR" property="picture" />
+    </resultMap>
+
+    <!--添加借阅记录-->
+    <insert id="insertBorrowRecord" parameterType="com.example.demo.pojo.Record" useGeneratedKeys="true" keyProperty="id">
+        insert into book_borrow_record (borrow_user,borrow_number,borrow_time)
+        VALUES (#{loginName},#{borrowNum},#{borrowTime})
+    </insert>
+
+    <!--添加借阅记录明细表-->
+    <insert id="insertBorrowDetail" parameterType="java.util.List">
+        insert into borrow_detail (book_ISBN,borrow_user,borrow_time,book_status,borrow_record_id)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.bookIsbn},#{item.borrowUser},#{item.borrowDate},'借出',#{item.borrowRecordId}
+            )
+        </foreach>
+    </insert>
+
+    <!--查询借阅信息-->
+    <select id="selectBorrowDetail" parameterType="com.example.demo.pojo.BookInfo" resultMap="recordMap">
+        select * from borrow_detail bd
+        left join book_info bi on bd.book_ISBN = bi.book_ISBN
+        <where>
+            <if test="borrowUser!=null and borrowUser!=''">
+                bd.borrow_user = #{borrowUser}
+            </if>
+            <if test="bookIsbn!=null and bookIsbn!=''">
+                and bd.book_ISBN =#{bookIsbn}
+            </if>
+            <if test="bookName!=null and bookName!=''">
+                and bd.book_name =#{bookName}
+            </if>
+            <if test="status!=null and status!=''">
+                and bd.book_status =#{status}
+            </if>
+        </where>
+    </select>
+
+    <!--更新借阅明细书籍的状态-->
+    <update id="updateDetailStatus" parameterType="com.example.demo.pojo.Record">
+        update borrow_detail
+        <trim prefix="set" suffixOverrides=",">
+            <if test="status!=null and status!=''">
+                book_status = #{status},
+            </if>
+            <if test="returnTime!=null">
+                return_time = #{returnTime},
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+    <!--更新借阅记录表中已还书的数量-->
+    <update id="updateRecordReturnNum" parameterType="com.example.demo.pojo.Record">
+        update book_borrow_record set return_number = return_number + 1
+        where id = #{borrowRecordId}
+    </update>
+
+    <!--查询借阅记录表-->
+    <select id="selectBorrowRecord" parameterType="com.example.demo.pojo.Record" resultMap="recordMap">
+        select * from book_borrow_record
+        <where>
+            <if test="loginName!=null and loginName!=''">
+                borrow_user = #{loginName}
+            </if>
+            <if test="status!=null and status!=''">
+                and borrow_number = return_number
+            </if>
+            <if test="startTime!=null and endTime != null">
+                and borrow_time BETWEEN #{startTime} and #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!--查询借阅记录对应的详细信息-->
+    <select id="selectBorrowRecordDetail" parameterType="com.example.demo.pojo.Record" resultMap="recordMap">
+        select * from book_borrow_record bbr
+        left join borrow_detail bd on bbr.id = bd.borrow_record_id
+        left join book_info bi on bi.book_ISBN = bd.book_ISBN
+        <where>
+            <if test="id!=null and id!=''">
+                bbr.id = #{id}
+            </if>
+        </where>
+    </select>
+</mapper>

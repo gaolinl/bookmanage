@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.BookUserMapper">
+  <resultMap id="BaseResultMap" type="com.example.demo.pojo.BookUser">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="login_name" jdbcType="VARCHAR" property="loginName" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="balance" jdbcType="DOUBLE" property="balance" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime" />
+    <result column="role_id" jdbcType="INTEGER" property="roleId" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from book_user
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="com.example.demo.pojo.BookUser" useGeneratedKeys="true" keyProperty="id">
+    insert into book_user (login_name, user_name, password,
+      balance, status, create_time, 
+      update_time, last_login_time, role_id
+      )
+    values (#{loginName,jdbcType=VARCHAR}, #{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{balance,jdbcType=DOUBLE}, #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{lastLoginTime,jdbcType=TIMESTAMP}, #{roleId,jdbcType=INTEGER}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.example.demo.pojo.BookUser">
+    update book_user
+    <trim prefix="set" suffixOverrides=",">
+      <if test="userName != null and userName != ''">
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null and password != ''">
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="balance != null and balance != ''">
+        balance = #{balance,jdbcType=DOUBLE},
+      </if>
+      <if test="status != null and status != ''">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="userName != null and userName != ''">
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null and roleId != ''">
+        role_id = #{roleId,jdbcType=INTEGER},
+      </if>
+      <if test="lastLoginTime != null">
+        last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="loginName != null">
+        login_name = #{loginName,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select id,login_name, user_name, password, balance, status, create_time, update_time,
+    last_login_time, role_id
+    from book_user
+    where login_name = #{loginName,jdbcType=VARCHAR}
+
+  </select>
+
+  <select id="selectLoginInfo" parameterType="com.example.demo.pojo.BookUser" resultMap="BaseResultMap">
+    select id,login_name, user_name, password, balance, status, create_time, update_time,
+    last_login_time, role_id
+    from book_user
+    <where>
+      <if test="loginName!=null and loginName !=''">
+        login_name = #{loginName,jdbcType=VARCHAR}
+      </if>
+      <if test="password!=null and password !=''">
+        and password = #{password}
+      </if>
+    </where>
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap" parameterType="com.example.demo.pojo.BookUser">
+    select id,login_name, user_name, password, balance, status, create_time, update_time,
+    last_login_time, role_id
+    from book_user
+    <where>
+      <if test="loginName!=null and loginName != ''">
+        login_name like concat('%',#{loginName},'%')
+      </if>
+      <if test="userName!=null and userName != ''">
+        and user_name like concat('%',#{userName},'%')
+      </if>
+      <if test="balance!=null and balance != ''">
+        and balance = #{balance}
+      </if>
+      <if test="status!=null and status != ''">
+        and status = #{status}
+      </if>
+      <if test="roleId!=null and roleId != ''">
+        and role_id = #{roleId}
+      </if>
+      <if test="startTime!=null and endTime != null">
+        and last_login_time BETWEEN #{startTime} and #{endTime}
+      </if>
+    </where>
+    order by id desc
+  </select>
+</mapper>
